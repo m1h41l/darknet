@@ -11,9 +11,6 @@ layer make_shortcut_layer(int batch, int n, int *input_layers, int* input_sizes,
     float **layers_output, float **layers_delta, float **layers_output_gpu, float **layers_delta_gpu, WEIGHTS_TYPE_T weights_type, WEIGHTS_NORMALIZATION_T weights_normalization,
     ACTIVATION activation, int train)
 {
-    fprintf(stderr, "Shortcut Layer: ");
-    int i;
-    for(i = 0; i < n; ++i) fprintf(stderr, "%d, ", input_layers[i]);
 
     layer l = { (LAYER_TYPE)0 };
     l.train = train;
@@ -49,7 +46,7 @@ layer make_shortcut_layer(int batch, int n, int *input_layers, int* input_sizes,
     l.nweights = 0;
     if (l.weights_type == PER_FEATURE) l.nweights = (l.n + 1);
     else if (l.weights_type == PER_CHANNEL) l.nweights = (l.n + 1) * l.c;
-
+    int i;
     if (l.nweights > 0) {
         l.weights = (float*)calloc(l.nweights, sizeof(float));
         float scale = sqrt(2. / l.nweights);
@@ -87,7 +84,6 @@ layer make_shortcut_layer(int batch, int n, int *input_layers, int* input_sizes,
 
     l.bflops = l.out_w * l.out_h * l.out_c * l.n / 1000000000.;
     if (l.weights_type) l.bflops *= 2;
-    fprintf(stderr, " wt = %d, wn = %d, outputs:%4d x%4d x%4d %5.3f BF\n", l.weights_type, l.weights_normalization, l.out_w, l.out_h, l.out_c, l.bflops);
     return l;
 }
 

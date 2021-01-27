@@ -693,9 +693,6 @@ void forward_gaussian_yolo_layer(const layer l, network_state state)
     uc_loss /= l.batch;
     iou_loss /= l.batch;
 
-    fprintf(stderr, "Region %d Avg IOU: %f, Class: %f, Obj: %f, No Obj: %f, .5R: %f, .75R: %f,  count: %d, class_loss = %.2f, iou_loss = %.2f, uc_loss = %.2f, total_loss = %.2f \n",
-        state.index, avg_iou/count, avg_cat/class_count, avg_obj/count, avg_anyobj/(l.w*l.h*l.n*l.batch), recall/count, recall75/count, count,
-        class_loss, iou_loss, uc_loss, loss);
 }
 
 void backward_gaussian_yolo_layer(const layer l, network_state state)

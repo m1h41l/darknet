@@ -473,9 +473,7 @@ int recalculate_workspace_size(network *net)
 
 #ifdef GPU
     if (gpu_index >= 0) {
-        printf("\n try to allocate additional workspace_size = %1.2f MB \n", (float)workspace_size / 1000000);
         net->workspace = cuda_make_array(0, workspace_size / sizeof(float) + 1);
-        printf(" CUDA allocate done! \n");
     }
     else {
         free(net->workspace);
@@ -485,7 +483,6 @@ int recalculate_workspace_size(network *net)
     free(net->workspace);
     net->workspace = (float*)xcalloc(1, workspace_size);
 #endif
-    //fprintf(stderr, " Done!\n");
     return 0;
 }
 
@@ -535,11 +532,8 @@ int resize_network(network *net, int w, int h)
     net->h = h;
     int inputs = 0;
     size_t workspace_size = 0;
-    //fprintf(stderr, "Resizing to %d x %d...\n", w, h);
-    //fflush(stderr);
     for (i = 0; i < net->n; ++i){
         layer l = net->layers[i];
-        //printf(" (resize %d: layer = %d) , ", i, l.type);
         if(l.type == CONVOLUTIONAL){
             resize_convolutional_layer(&l, w, h);
         }
@@ -598,17 +592,14 @@ int resize_network(network *net, int w, int h)
         if(l.workspace_size > workspace_size) workspace_size = l.workspace_size;
         inputs = l.outputs;
         net->layers[i] = l;
-        //if(l.type != DROPOUT)
         {
             w = l.out_w;
             h = l.out_h;
         }
-        //if(l.type == AVGPOOL) break;
     }
 #ifdef GPU
     const int size = get_network_input_size(*net) * net->batch;
     if(gpu_index >= 0){
-        printf(" try to allocate additional workspace_size = %1.2f MB \n", (float)workspace_size / 1000000);
         net->workspace = cuda_make_array(0, workspace_size/sizeof(float) + 1);
         net->input_state_gpu = cuda_make_array(0, size);
         if (cudaSuccess == cudaHostAlloc(&net->input_pinned_cpu, size * sizeof(float), cudaHostRegisterMapped))
@@ -618,7 +609,6 @@ int resize_network(network *net, int w, int h)
             net->input_pinned_cpu = (float*)xcalloc(size, sizeof(float));
             net->input_pinned_cpu_flag = 0;
         }
-        printf(" CUDA allocate done! \n");
     }else {
         free(net->workspace);
         net->workspace = (float*)xcalloc(1, workspace_size);
@@ -629,7 +619,6 @@ int resize_network(network *net, int w, int h)
     free(net->workspace);
     net->workspace = (float*)xcalloc(1, workspace_size);
 #endif
-    //fprintf(stderr, " Done!\n");
     return 0;
 }
 
@@ -653,7 +642,6 @@ detection_layer get_network_detection_layer(network net)
             return net.layers[i];
         }
     }
-    fprintf(stderr, "Detection layer not found!!\n");
     detection_layer l = { (LAYER_TYPE)0 };
     return l;
 }
@@ -690,7 +678,6 @@ void visualize_network(network net)
     int i;
     char buff[256];
     for(i = 0; i < net.n; ++i){
-        sprintf(buff, "Layer %d", i);
         layer l = net.layers[i];
         if(l.type == CONVOLUTIONAL){
             prev = visualize_convolutional_layer(l, buff, prev);
@@ -1079,11 +1066,6 @@ void print_network(network net)
         int n = l.outputs;
         float mean = mean_array(output, n);
         float vari = variance_array(output, n);
-        fprintf(stderr, "Layer %d - Mean: %f, Variance: %f\n",i,mean, vari);
-        if(n > 100) n = 100;
-        for(j = 0; j < n; ++j) fprintf(stderr, "%f, ", output[j]);
-        if(n == 100)fprintf(stderr,".....\n");
-        fprintf(stderr, "\n");
     }
 }
 
@@ -1106,10 +1088,8 @@ void compare_networks(network n1, network n2, data test)
             else ++a;
         }
     }
-    printf("%5d %5d\n%5d %5d\n", a, b, c, d);
     float num = pow((abs(b - c) - 1.), 2.);
     float den = b + c;
-    printf("%f\n", num/den);
 }
 
 float network_accuracy(network net, data d)
@@ -1197,7 +1177,6 @@ void fuse_conv_batchnorm(network net)
         layer *l = &net.layers[j];
 
         if (l->type == CONVOLUTIONAL) {
-            //printf(" Merges Convolutional-%d and batch_norm \n", j);
 
             if (l->share_layer != NULL) {
                 l->batch_normalize = 0;
@@ -1229,14 +1208,6 @@ void fuse_conv_batchnorm(network net)
         }
         else  if (l->type == SHORTCUT && l->weights && l->weights_normalization)
         {
-            if (l->nweights > 0) {
-                //cuda_pull_array(l.weights_gpu, l.weights, l.nweights);
-                int i;
-                for (i = 0; i < l->nweights; ++i) printf(" w = %f,", l->weights[i]);
-                printf(" l->nweights = %d, j = %d \n", l->nweights, j);
-            }
-
-            // nweights - l.n or l.n*l.c or (l.n*l.c*l.h*l.w)
             const int layer_step = l->nweights / (l->n + 1);    // 1 or l.c or (l.c * l.h * l.w)
 
             int chan, i;

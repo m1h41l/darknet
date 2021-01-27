@@ -28,7 +28,6 @@ static void increment_layer(layer *l, int steps)
 
 layer make_lstm_layer(int batch, int inputs, int outputs, int steps, int batch_normalize)
 {
-    fprintf(stderr, "LSTM Layer: %d inputs, %d outputs\n", inputs, outputs);
     batch = batch / steps;
     layer l = { (LAYER_TYPE)0 };
     l.batch = batch;
@@ -40,49 +39,41 @@ layer make_lstm_layer(int batch, int inputs, int outputs, int steps, int batch_n
     l.out_c = outputs;
 
     l.uf = (layer*)xcalloc(1, sizeof(layer));
-    fprintf(stderr, "\t\t");
     *(l.uf) = make_connected_layer(batch, steps, inputs, outputs, LINEAR, batch_normalize);
     l.uf->batch = batch;
     if (l.workspace_size < l.uf->workspace_size) l.workspace_size = l.uf->workspace_size;
 
     l.ui = (layer*)xcalloc(1, sizeof(layer));
-    fprintf(stderr, "\t\t");
     *(l.ui) = make_connected_layer(batch, steps, inputs, outputs, LINEAR, batch_normalize);
     l.ui->batch = batch;
     if (l.workspace_size < l.ui->workspace_size) l.workspace_size = l.ui->workspace_size;
 
     l.ug = (layer*)xcalloc(1, sizeof(layer));
-    fprintf(stderr, "\t\t");
     *(l.ug) = make_connected_layer(batch, steps, inputs, outputs, LINEAR, batch_normalize);
     l.ug->batch = batch;
     if (l.workspace_size < l.ug->workspace_size) l.workspace_size = l.ug->workspace_size;
 
     l.uo = (layer*)xcalloc(1, sizeof(layer));
-    fprintf(stderr, "\t\t");
     *(l.uo) = make_connected_layer(batch, steps, inputs, outputs, LINEAR, batch_normalize);
     l.uo->batch = batch;
     if (l.workspace_size < l.uo->workspace_size) l.workspace_size = l.uo->workspace_size;
 
     l.wf = (layer*)xcalloc(1, sizeof(layer));
-    fprintf(stderr, "\t\t");
     *(l.wf) = make_connected_layer(batch, steps, outputs, outputs, LINEAR, batch_normalize);
     l.wf->batch = batch;
     if (l.workspace_size < l.wf->workspace_size) l.workspace_size = l.wf->workspace_size;
 
     l.wi = (layer*)xcalloc(1, sizeof(layer));
-    fprintf(stderr, "\t\t");
     *(l.wi) = make_connected_layer(batch, steps, outputs, outputs, LINEAR, batch_normalize);
     l.wi->batch = batch;
     if (l.workspace_size < l.wi->workspace_size) l.workspace_size = l.wi->workspace_size;
 
     l.wg = (layer*)xcalloc(1, sizeof(layer));
-    fprintf(stderr, "\t\t");
     *(l.wg) = make_connected_layer(batch, steps, outputs, outputs, LINEAR, batch_normalize);
     l.wg->batch = batch;
     if (l.workspace_size < l.wg->workspace_size) l.workspace_size = l.wg->workspace_size;
 
     l.wo = (layer*)xcalloc(1, sizeof(layer));
-    fprintf(stderr, "\t\t");
     *(l.wo) = make_connected_layer(batch, steps, outputs, outputs, LINEAR, batch_normalize);
     l.wo->batch = batch;
     if (l.workspace_size < l.wo->workspace_size) l.workspace_size = l.wo->workspace_size;

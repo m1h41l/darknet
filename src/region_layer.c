@@ -45,7 +45,6 @@ region_layer make_region_layer(int batch, int w, int h, int n, int classes, int 
     l.delta_gpu = cuda_make_array(l.delta, batch*l.outputs);
 #endif
 
-    fprintf(stderr, "detection\n");
     srand(time(0));
 
     return l;
@@ -361,7 +360,6 @@ void forward_region_layer(const region_layer l, network_state state)
     flatten(l.delta, l.w*l.h, size*l.n, l.batch, 0);
     #endif
     *(l.cost) = pow(mag_array(l.delta, l.outputs * l.batch), 2);
-    printf("Region Avg IOU: %f, Class: %f, Obj: %f, No Obj: %f, Avg Recall: %f,  count: %d\n", avg_iou/count, avg_cat/class_count, avg_obj/count, avg_anyobj/(l.w*l.h*l.n*l.batch), recall/count, count);
 }
 
 void backward_region_layer(const region_layer l, network_state state)

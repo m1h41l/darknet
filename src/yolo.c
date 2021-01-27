@@ -14,13 +14,11 @@ void train_yolo(char *cfgfile, char *weightfile)
     char* backup_directory = "backup/";
     srand(time(0));
     char *base = basecfg(cfgfile);
-    printf("%s\n", base);
     float avg_loss = -1;
     network net = parse_network_cfg(cfgfile);
     if(weightfile){
         load_weights(&net, weightfile);
     }
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
     int imgs = net.batch*net.subdivisions;
     int i = *net.seen/imgs;
     data train, buffer;
@@ -63,23 +61,18 @@ void train_yolo(char *cfgfile, char *weightfile)
         train = buffer;
         load_thread = load_data_in_thread(args);
 
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
-
         time=clock();
         float loss = train_network(net, train);
         if (avg_loss < 0) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
 
-        printf("%d: %f, %f avg, %f rate, %lf seconds, %d images\n", i, loss, avg_loss, get_current_rate(net), sec(clock()-time), i*imgs);
         if(i%1000==0 || (i < 1000 && i%100 == 0)){
             char buff[256];
-            sprintf(buff, "%s/%s_%d.weights", backup_directory, base, i);
             save_weights(net, buff);
         }
         free_data(train);
     }
     char buff[256];
-    sprintf(buff, "%s/%s_final.weights", backup_directory, base);
     save_weights(net, buff);
 }
 
@@ -111,7 +104,6 @@ void validate_yolo(char *cfgfile, char *weightfile)
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
-    fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
     srand(time(0));
 
     char *base = "results/comp4_det_test_";
@@ -127,7 +119,6 @@ void validate_yolo(char *cfgfile, char *weightfile)
     FILE** fps = (FILE**)xcalloc(classes, sizeof(FILE*));
     for(j = 0; j < classes; ++j){
         char buff[1024];
-        snprintf(buff, 1024, "%s%s.txt", base, voc_names[j]);
         fps[j] = fopen(buff, "w");
     }
     box* boxes = (box*)xcalloc(l.side * l.side * l.n, sizeof(box));
@@ -162,7 +153,6 @@ void validate_yolo(char *cfgfile, char *weightfile)
     }
     time_t start = time(0);
     for(i = nthreads; i < m+nthreads; i += nthreads){
-        fprintf(stderr, "%d\n", i);
         for(t = 0; t < nthreads && i+t-nthreads < m; ++t){
             pthread_join(thr[t], 0);
             val[t] = buf[t];
@@ -197,7 +187,6 @@ void validate_yolo(char *cfgfile, char *weightfile)
     if (buf_resized) free(buf_resized);
     if (thr) free(thr);
 
-    fprintf(stderr, "Total Detection Time: %f Seconds\n", (double)(time(0) - start));
     for(j = 0; j < classes; ++j){
         fclose(fps[j]);
     }
@@ -211,7 +200,6 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
         load_weights(&net, weightfile);
     }
     set_batch_network(&net, 1);
-    fprintf(stderr, "Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
     srand(time(0));
 
     list *plist = get_paths("data/voc.2007.test");
@@ -275,7 +263,6 @@ void validate_yolo_recall(char *cfgfile, char *weightfile)
             }
         }
 
-        fprintf(stderr, "%5d %5d %5d\tRPs/Img: %.2f\tIOU: %.2f%%\tRecall:%.2f%%\n", i, correct, total, (float)proposals/(i+1), avg_iou*100/total, 100.*correct/total);
         free(id);
         free_image(orig);
         free_image(sized);
@@ -305,8 +292,6 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
         if(filename){
             strncpy(input, filename, 256);
         } else {
-            printf("Enter Image Path: ");
-            fflush(stdout);
             input = fgets(input, 256, stdin);
             if(!input) return;
             strtok(input, "\n");
@@ -316,7 +301,6 @@ void test_yolo(char *cfgfile, char *weightfile, char *filename, float thresh)
         float *X = sized.data;
         clock_t time=clock();
         network_predict(net, X);
-        printf("%s: Predicted in %f seconds.\n", input, sec(clock()-time));
         get_detection_boxes(l, 1, 1, thresh, probs, boxes, 0);
         if (nms) do_nms_sort_v2(boxes, probs, l.side*l.side*l.n, l.classes, nms);
         //draw_detections(im, l.side*l.side*l.n, thresh, boxes, probs, voc_names, alphabet, 20);

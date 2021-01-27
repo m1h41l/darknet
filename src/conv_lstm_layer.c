@@ -34,7 +34,7 @@ static void increment_layer(layer *l, int steps)
 
 layer make_conv_lstm_layer(int batch, int h, int w, int c, int output_filters, int groups, int steps, int size, int stride, int dilation, int pad, ACTIVATION activation, int batch_normalize, int peephole, int xnor, int bottleneck, int train)
 {
-    fprintf(stderr, "CONV_LSTM Layer: %d x %d x %d image, %d filters\n", h, w, c, output_filters);
+
     /*
     batch = batch / steps;
     layer l = { (LAYER_TYPE)0 };

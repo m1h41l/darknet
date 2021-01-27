@@ -32,7 +32,6 @@ char *get_cost_string(COST_TYPE a)
 
 cost_layer make_cost_layer(int batch, int inputs, COST_TYPE cost_type, float scale)
 {
-    fprintf(stderr, "cost                                           %4d\n",  inputs);
     cost_layer l = { (LAYER_TYPE)0 };
     l.type = COST;
 
@@ -133,7 +132,6 @@ void forward_cost_layer_gpu(cost_layer l, network_state state)
         int n = (1-l.ratio) * l.batch*l.inputs;
         float thresh = l.delta[n];
         thresh = 0;
-        printf("%f\n", thresh);
         supp_ongpu(l.batch*l.inputs, thresh, l.delta_gpu, 1);
     }
 

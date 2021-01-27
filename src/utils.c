@@ -195,13 +195,9 @@ void pm(int M, int N, float *A)
 {
     int i,j;
     for(i =0 ; i < M; ++i){
-        printf("%d ", i+1);
         for(j = 0; j < N; ++j){
-            printf("%2.4f, ", A[i*N+j]);
         }
-        printf("\n");
     }
-    printf("\n");
 }
 
 void find_replace(const char* str, char* orig, char* rep, char* output)
@@ -209,23 +205,19 @@ void find_replace(const char* str, char* orig, char* rep, char* output)
     char* buffer = (char*)calloc(8192, sizeof(char));
     char *p;
 
-    sprintf(buffer, "%s", str);
     if (!(p = strstr(buffer, orig))) {  // Is 'orig' even in 'str'?
-        sprintf(output, "%s", buffer);
         free(buffer);
         return;
     }
 
     *p = '\0';
 
-    sprintf(output, "%s%s%s", buffer, rep, p + strlen(orig));
     free(buffer);
 }
 
 void trim(char *str)
 {
     char* buffer = (char*)xcalloc(8192, sizeof(char));
-    sprintf(buffer, "%s", str);
 
     char *p = buffer;
     while (*p == ' ' || *p == '\t') ++p;
@@ -235,7 +227,6 @@ void trim(char *str)
         *end = '\0';
         --end;
     }
-    sprintf(str, "%s", p);
 
     free(buffer);
 }
@@ -244,18 +235,15 @@ void find_replace_extension(char *str, char *orig, char *rep, char *output)
 {
     char* buffer = (char*)calloc(8192, sizeof(char));
 
-    sprintf(buffer, "%s", str);
     char *p = strstr(buffer, orig);
     int offset = (p - buffer);
     int chars_from_end = strlen(buffer) - offset;
     if (!p || chars_from_end != strlen(orig)) {  // Is 'orig' even in 'str' AND is 'orig' found at the end of 'str'?
-        sprintf(output, "%s", buffer);
         free(buffer);
         return;
     }
 
     *p = '\0';
-    sprintf(output, "%s%s%s", buffer, rep, p + strlen(orig));
     free(buffer);
 }
 
@@ -592,7 +580,6 @@ void print_statistics(float *a, int n)
 {
     float m = mean_array(a, n);
     float v = variance_array(a, n);
-    printf("MSE: %.6f, Mean: %.6f, Variance: %.6f\n", mse_array(a, n), m, v);
 }
 
 float variance_array(float *a, int n)

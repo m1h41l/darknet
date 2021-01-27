@@ -98,8 +98,6 @@ deconvolutional_layer make_deconvolutional_layer(int batch, int h, int w, int c,
 
     l.activation = activation;
 
-    fprintf(stderr, "Deconvolutional Layer: %d x %d x %d image, %d filters -> %d x %d x %d image\n", h,w,c,n, out_h, out_w, n);
-
     return l;
 }
 

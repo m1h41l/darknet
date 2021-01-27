@@ -273,7 +273,6 @@ image **load_alphabet()
         alphabets[j] = (image*)xcalloc(128, sizeof(image));
         for(i = 32; i < 127; ++i){
             char buff[256];
-            sprintf(buff, "data/labels/%d_%d.png", i, j);
             alphabets[j][i] = load_image_color(buff, 0, 0);
         }
     }
@@ -339,26 +338,9 @@ void draw_detections_v3(image im, detection *dets, int num, float thresh, char *
     int i;
     for (i = 0; i < selected_detections_num; ++i) {
         const int best_class = selected_detections[i].best_class;
-        printf("%s: %.0f%%", names[best_class],    selected_detections[i].det.prob[best_class] * 100);
-        if (ext_output)
-            printf("\t(left_x: %4.0f   top_y: %4.0f   width: %4.0f   height: %4.0f)\n",
-                round((selected_detections[i].det.bbox.x - selected_detections[i].det.bbox.w / 2)*im.w),
-                round((selected_detections[i].det.bbox.y - selected_detections[i].det.bbox.h / 2)*im.h),
-                round(selected_detections[i].det.bbox.w*im.w), round(selected_detections[i].det.bbox.h*im.h));
-        else
-            printf("\n");
         int j;
         for (j = 0; j < classes; ++j) {
             if (selected_detections[i].det.prob[j] > thresh && j != best_class) {
-                printf("%s: %.0f%%", names[j], selected_detections[i].det.prob[j] * 100);
-
-                if (ext_output)
-                    printf("\t(left_x: %4.0f   top_y: %4.0f   width: %4.0f   height: %4.0f)\n",
-                        round((selected_detections[i].det.bbox.x - selected_detections[i].det.bbox.w / 2)*im.w),
-                        round((selected_detections[i].det.bbox.y - selected_detections[i].det.bbox.h / 2)*im.h),
-                        round(selected_detections[i].det.bbox.w*im.w), round(selected_detections[i].det.bbox.h*im.h));
-                else
-                    printf("\n");
             }
         }
     }
@@ -505,12 +487,10 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
             if(right > im.w-1) right = im.w-1;
             if(top < 0) top = 0;
             if(bot > im.h-1) bot = im.h-1;
-            printf("%s: %.0f%%", names[class_id], prob * 100);
 
             //printf(" - id: %d, x_center: %d, y_center: %d, width: %d, height: %d",
             //    class_id, (right + left) / 2, (bot - top) / 2, right - left, bot - top);
 
-            printf("\n");
             draw_box_width(im, left, top, right, bot, width, red, green, blue);
             if (alphabet) {
                 image label = get_label(alphabet, names[class_id], (im.h*.03)/10);
@@ -764,7 +744,6 @@ void show_image_layers(image p, char *name)
     int i;
     char buff[256];
     for(i = 0; i < p.c; ++i){
-        sprintf(buff, "%s - Layer %d", name, i);
         image layer = get_image_layer(p, i);
         show_image(layer, buff);
         free_image(layer);
@@ -926,7 +905,6 @@ int best_3d_shift(image a, image b, int min, int max)
             best_distance = d;
             best = i;
         }
-        printf("%d %f\n", i, d);
         free_image(c);
     }
     return best;
@@ -949,10 +927,9 @@ void composite_3d(char *f1, char *f2, char *out, int delta)
         a = b;
         b = swap;
         shift = -shift;
-        printf("swapped, %d\n", shift);
     }
     else{
-        printf("%d\n", shift);
+        // printf("%d\n", shift);
     }
 
     image c = crop_image(b, delta, shift, a.w, a.h);
@@ -1434,7 +1411,6 @@ void test_resize(char *filename)
 {
     image im = load_image(filename, 0,0, 3);
     float mag = mag_array(im.data, im.w*im.h*im.c);
-    printf("L2 Norm: %f\n", mag);
     image gray = grayscale_image(im);
 
     image c1 = copy_image(im);
@@ -1473,7 +1449,6 @@ void test_resize(char *filename)
 
         distort_image(c, dhue, dsat, dexp);
         show_image(c, "rand");
-        printf("%f %f %f\n", dhue, dsat, dexp);
         free_image(c);
         wait_until_press_key_cv();
     }

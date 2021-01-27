@@ -153,7 +153,6 @@ connected_layer make_connected_layer(int batch, int steps, int inputs, int outpu
     l.workspace_size = get_connected_workspace_size(l);
 #endif  // CUDNN
 #endif  // GPU
-    fprintf(stderr, "connected                            %4d  ->  %4d\n", inputs, outputs);
     return l;
 }
 
@@ -262,20 +261,7 @@ void denormalize_connected_layer(layer l)
 
 void statistics_connected_layer(layer l)
 {
-    if(l.batch_normalize){
-        printf("Scales ");
-        print_statistics(l.scales, l.outputs);
-        /*
-        printf("Rolling Mean ");
-        print_statistics(l.rolling_mean, l.outputs);
-        printf("Rolling Variance ");
-        print_statistics(l.rolling_variance, l.outputs);
-        */
-    }
-    printf("Biases ");
-    print_statistics(l.biases, l.outputs);
-    printf("Weights ");
-    print_statistics(l.weights, l.outputs);
+    // tess
 }
 
 #ifdef GPU

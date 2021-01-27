@@ -10,35 +10,29 @@ void train_dice(char *cfgfile, char *weightfile)
     float avg_loss = -1;
     char *base = basecfg(cfgfile);
     char* backup_directory = "backup/";
-    printf("%s\n", base);
     network net = parse_network_cfg(cfgfile);
     if(weightfile){
         load_weights(&net, weightfile);
     }
-    printf("Learning Rate: %g, Momentum: %g, Decay: %g\n", net.learning_rate, net.momentum, net.decay);
     int imgs = 1024;
     int i = *net.seen/imgs;
     char **labels = dice_labels;
     list *plist = get_paths("data/dice/dice.train.list");
     char **paths = (char **)list_to_array(plist);
-    printf("%d\n", plist->size);
     clock_t time;
     while(1){
         ++i;
         time=clock();
         data train = load_data_old(paths, imgs, plist->size, labels, 6, net.w, net.h);
-        printf("Loaded: %lf seconds\n", sec(clock()-time));
 
         time=clock();
         float loss = train_network(net, train);
         if(avg_loss == -1) avg_loss = loss;
         avg_loss = avg_loss*.9 + loss*.1;
-        printf("%d: %f, %f avg, %lf seconds, %ld images\n", i, loss, avg_loss, sec(clock()-time), *net.seen);
         free_data(train);
         if((i % 100) == 0) net.learning_rate *= .1;
         if(i%100==0){
             char buff[256];
-            sprintf(buff, "%s/%s_%d.weights",backup_directory,base, i);
             save_weights(net, buff);
         }
     }
@@ -61,7 +55,6 @@ void validate_dice(char *filename, char *weightfile)
 
     data val = load_data_old(paths, m, 0, labels, 6, net.w, net.h);
     float *acc = network_accuracies(net, val, 2);
-    printf("Validation Accuracy: %f, %d images\n", acc[0], m);
     free_data(val);
 }
 
@@ -82,7 +75,6 @@ void test_dice(char *cfgfile, char *weightfile, char *filename)
         if(filename){
             strncpy(input, filename, 256);
         }else{
-            printf("Enter Image Path: ");
             fflush(stdout);
             input = fgets(input, 256, stdin);
             if(!input) return;
